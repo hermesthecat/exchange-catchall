@@ -41,6 +41,7 @@ The .dll is compiled for .NET 3.5 (Exchange 2007 and 2010) or .NET 4 (Exchange 2
 * Exchange 2013 CU13    (15.0.1210.3)
 * Exchange 2013 CU14    (15.0.1236.3)
 * Exchange 2013 CU15    (15.0.1263.5)
+* Exchange 2013 SP1 CU23 (15.0.1497.18)
 * Exchange 2016 Preview (15.1.225.17)
 * Exchange 2016 RTM     (15.1.225.42)
 * Exchange 2016 CU1     (15.1.396.30)
@@ -179,6 +180,9 @@ If you want to debug the .dll on your Exchange Server, you need to install [Visu
 8. When reached, the process should stop at the breakpoint
 
 ## Changelog
+
+* 22.05.2022 [1.7.0]:  
+    - New: Support for Exchange 2013 CU23
 
 * 22.12.2016 [1.6.9]:  
     - New: Support for Exchange 2013 CU14, CU15 and 2016 CU4
