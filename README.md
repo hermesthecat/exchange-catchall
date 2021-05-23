@@ -1,4 +1,4 @@
-Exchange CatchAll Agent [![Build Status](https://travis-ci.org/Pro/exchange-catchall.png?branch=master)](https://travis-ci.org/Pro/exchange-catchall)
+Exchange CatchAll Agent [![Build Status](https://travis-ci.com/hermesthecat/exchange-catchall.svg?branch=master)](https://travis-ci.com/hermesthecat/exchange-catchall)
 =============
 
 CatchAll Agent for Exchange Server.
