@@ -30,18 +30,21 @@ namespace Exchange.CatchAll
 
             try
             {
-                sqlConnection.Open();
-
-                MySqlCommand command = new MySqlCommand();
-                command.Connection = (MySqlConnection) sqlConnection;
-                command.CommandText = "INSERT INTO Caught (date, original, replaced, message_id, subject) " +
-                                        "Values(NOW(), @original, @replaced, @message_id, @subject)";
-                command.Parameters.AddWithValue("@original", original);
-                command.Parameters.AddWithValue("@replaced", replaced);
-                command.Parameters.AddWithValue("@subject", subject);
-                command.Parameters.AddWithValue("@message_id", message_id);
-                command.ExecuteNonQuery();
-                sqlConnection.Close();
+                using (var connection = new MySqlConnection(((MySqlConnection)sqlConnection).ConnectionString))
+                {
+                    connection.Open();
+                    using (var command = new MySqlCommand())
+                    {
+                        command.Connection = connection;
+                        command.CommandText = "INSERT INTO Caught (date, original, replaced, message_id, subject) " +
+                                                "Values(NOW(), @original, @replaced, @message_id, @subject)";
+                        command.Parameters.AddWithValue("@original", original);
+                        command.Parameters.AddWithValue("@replaced", replaced);
+                        command.Parameters.AddWithValue("@subject", subject);
+                        command.Parameters.AddWithValue("@message_id", message_id);
+                        command.ExecuteNonQuery();
+                    }
+                }
             }
             catch (MySqlException ex)
             {
@@ -56,16 +59,19 @@ namespace Exchange.CatchAll
             
             try
             {
-                sqlConnection.Open();
-
-                MySqlCommand command = new MySqlCommand("update blocked set hits=hits+1 where address=@address");
-                command.Connection = (MySqlConnection) sqlConnection;
-                command.Parameters.AddWithValue("@address", address);
-                bool retVal = (command.ExecuteNonQuery() > 0);
-                sqlConnection.Close();
-                
-                // if we updated a value, the address is blocked.
-                return retVal;
+                using (var connection = new MySqlConnection(((MySqlConnection)sqlConnection).ConnectionString))
+                {
+                    connection.Open();
+                    using (var command = new MySqlCommand("update blocked set hits=hits+1 where address=@address"))
+                    {
+                        command.Connection = connection;
+                        command.Parameters.AddWithValue("@address", address);
+                        bool retVal = (command.ExecuteNonQuery() > 0);
+                        
+                        // if we updated a value, the address is blocked.
+                        return retVal;
+                    }
+                }
             }
             catch (MySqlException ex)
             {

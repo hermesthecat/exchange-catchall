@@ -34,6 +34,7 @@ namespace Exchange.CatchAll
     using Microsoft.Exchange.Data.Transport;
     using Microsoft.Exchange.Data.Transport.Smtp;
     using Microsoft.Exchange.Data.Mime;
+    using System.Collections.Concurrent;
 
     /// <summary>
     /// CatchAllAgent: An SmtpReceiveAgent implementing catch-all.
@@ -50,7 +51,7 @@ namespace Exchange.CatchAll
         private static SmtpResponse rejectResponse = new SmtpResponse("550", "5.1.1", "Recipient rejected");
 #endif
 
-        private Dictionary<string, string[]> origToMapping;
+        private ConcurrentDictionary<string, string[]> origToMapping;
 
         private List<DomainElement> domainList;
 
@@ -69,7 +70,7 @@ namespace Exchange.CatchAll
             // Save the address book and configuration
             this.addressBook = addressBook;
 
-            this.origToMapping = new Dictionary<string, string[]>();
+            this.origToMapping = new ConcurrentDictionary<string, string[]>();
 
             DomainSection domains = CatchAllFactory.GetCustomConfig<DomainSection>("domainSection");
             if (domains == null)
@@ -152,7 +153,7 @@ namespace Exchange.CatchAll
             string itemId = e.MailItem.GetHashCode().ToString() + e.MailItem.FromAddress.ToString();
             if (this.origToMapping.TryGetValue(itemId, out addrs))
             {
-                this.origToMapping.Remove(itemId);
+                this.origToMapping.TryRemove(itemId, out _);
                 if (this.databaseConnector != null)
                     this.databaseConnector.LogCatch(addrs[0], addrs[1], e.MailItem.Message.Subject, e.MailItem.Message.MessageId);
 
@@ -223,7 +224,7 @@ namespace Exchange.CatchAll
                     if (!origToMapping.ContainsKey(itemId))
                     {
                         string[] addrs = new string[] { rcptArgs.RecipientAddress.ToString().ToLower(), catchAllAddress.ToString().ToLower() };
-                        origToMapping.Add(itemId, addrs);
+                        origToMapping.TryAdd(itemId, addrs);
                     }
                     rcptArgs.RecipientAddress = catchAllAddress;
                 }

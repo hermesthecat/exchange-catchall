@@ -29,18 +29,21 @@ namespace Exchange.CatchAll
 
             try
             {
-                sqlConnection.Open();
-
-                SqlCommand command = new SqlCommand();
-                command.Connection = (SqlConnection)sqlConnection;
-                command.CommandText = "INSERT INTO Caught (date, original, replaced, message_id, subject) " +
-                                        "Values(GetDate(), @original, @replaced, @message_id, @subject)";
-                command.Parameters.AddWithValue("@original", original);
-                command.Parameters.AddWithValue("@replaced", replaced);
-                command.Parameters.AddWithValue("@subject", subject);
-                command.Parameters.AddWithValue("@message_id", message_id);
-                command.ExecuteNonQuery();
-                sqlConnection.Close();
+                using (var connection = new SqlConnection(((SqlConnection)sqlConnection).ConnectionString))
+                {
+                    connection.Open();
+                    using (var command = new SqlCommand())
+                    {
+                        command.Connection = connection;
+                        command.CommandText = "INSERT INTO Caught (date, original, replaced, message_id, subject) " +
+                                                "Values(GetDate(), @original, @replaced, @message_id, @subject)";
+                        command.Parameters.AddWithValue("@original", original);
+                        command.Parameters.AddWithValue("@replaced", replaced);
+                        command.Parameters.AddWithValue("@subject", subject);
+                        command.Parameters.AddWithValue("@message_id", message_id);
+                        command.ExecuteNonQuery();
+                    }
+                }
             }
             catch (SqlException ex)
             {
@@ -55,16 +58,19 @@ namespace Exchange.CatchAll
             
             try
             {
-                sqlConnection.Open();
-
-                SqlCommand command = new SqlCommand("update blocked set hits=hits+1 where address=@address");
-                command.Connection = (SqlConnection) sqlConnection;
-                command.Parameters.AddWithValue("@address", address);
-                bool retVal = (command.ExecuteNonQuery() > 0);
-                sqlConnection.Close();
-                
-                // if we updated a value, the address is blocked.
-                return retVal;
+                using (var connection = new SqlConnection(((SqlConnection)sqlConnection).ConnectionString))
+                {
+                    connection.Open();
+                    using (var command = new SqlCommand("update blocked set hits=hits+1 where address=@address"))
+                    {
+                        command.Connection = connection;
+                        command.Parameters.AddWithValue("@address", address);
+                        bool retVal = (command.ExecuteNonQuery() > 0);
+                        
+                        // if we updated a value, the address is blocked.
+                        return retVal;
+                    }
+                }
             }
             catch (SqlException ex)
             {

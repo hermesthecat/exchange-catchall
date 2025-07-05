@@ -9,6 +9,7 @@ namespace Exchange.CatchAll
     class Logger
     {
         private static EventLog logger = null;
+        private static readonly object loggerLock = new object();
 
         public static void LogInformation(string message)
         {
@@ -45,17 +46,20 @@ namespace Exchange.CatchAll
 
         private static void LogEntry(string message, int id, EventLogEntryType logType)
         {
-            if (logger == null)
+            lock (loggerLock)
             {
-                logger = new EventLog();
-                logger.Source = "Exchange CatchAll";
-                if (!EventLog.SourceExists(logger.Source))
+                if (logger == null)
                 {
-                    EventLog.CreateEventSource(logger.Source,"Application");
+                    logger = new EventLog();
+                    logger.Source = "Exchange CatchAll";
+                    if (!EventLog.SourceExists(logger.Source))
+                    {
+                        EventLog.CreateEventSource(logger.Source,"Application");
+                    }
                 }
-            }
 
-            logger.WriteEntry(message, logType, id);
+                logger.WriteEntry(message, logType, id);
+            }
         }
     }
 }

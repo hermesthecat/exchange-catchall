@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Configuration;
 using System.Text.RegularExpressions;
+using Exchange.CatchAll;
 
 namespace ConfigurationSettings
 {
@@ -42,10 +43,14 @@ namespace ConfigurationSettings
                 return false;
             try
             {
-                regexCompiled = new Regex(this.Name);
+                regexCompiled = new Regex(this.Name, RegexOptions.Compiled | RegexOptions.IgnoreCase);
                 return true;
             }
-            catch { }
+            catch (ArgumentException ex)
+            {
+                Logger.LogError($"Invalid regex pattern '{this.Name}': {ex.Message}");
+                return false;
+            }
             
             return false;
         }
